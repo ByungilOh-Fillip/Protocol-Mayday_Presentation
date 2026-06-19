@@ -1,34 +1,23 @@
-name: Deploy to GitHub Pages
+name: Deploy HTML
 
 on:
   push:
     branches:
       - main
 
-permissions:
-  contents: write
-
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Copy HTML to EC2
+        uses: appleboy/scp-action@v0.1.7
         with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build project
-        run: npm run build # package.json에 정의된 빌드 명령 실행
-
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: dist # 빌드된 결과물이 저장되는 폴더명 (Vite는 dist, Next는 out 등)
-          branch: gh-pages # 배포된 파일이 저장될 브랜치
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "index.html"
+          target: "/var/www/html"
